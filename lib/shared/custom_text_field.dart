@@ -48,17 +48,21 @@ class _CustomTextFieldState extends State<CustomTextField> {
       },
       obscureText: _obscureText,
       decoration: InputDecoration(
-        errorStyle: TextStyle(fontWeight: FontWeight.w700),
+        errorStyle: const TextStyle(fontWeight: FontWeight.w700),
         suffixIcon: widget.isPassword
             ? GestureDetector(
                 onTap: _togglePassWord,
-                child: Icon(CupertinoIcons.eye),
+                child: Icon(
+                  _obscureText
+                      ? CupertinoIcons.eye_fill
+                      : CupertinoIcons.eye_slash_fill,
+                ),
               )
-            : Icon(CupertinoIcons.mail),
-        enabledBorder: OutlineInputBorder(
+            : null,
+        enabledBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.white),
         ),
-        focusedBorder: OutlineInputBorder(
+        focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.white),
         ),
         hintText: widget.hint,
