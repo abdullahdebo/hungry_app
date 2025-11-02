@@ -13,7 +13,7 @@ class CustomAuthBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<FormState> formkey = GlobalKey<FormState>();
+    // final GlobalKey<FormState> formkey = GlobalKey<FormState>();
 
     return GestureDetector(
       onTap: onTap,
