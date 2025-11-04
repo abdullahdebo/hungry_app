@@ -4,6 +4,7 @@ import 'package:hungry_app/core/constants/app_colors.dart';
 import 'package:hungry_app/features/home/widget/card_item.dart';
 import 'package:hungry_app/features/home/widget/search_field.dart';
 import 'package:hungry_app/features/home/widget/user_header.dart';
+import 'package:hungry_app/features/product/view/product_details_view.dart';
 import 'package:hungry_app/shared/custom_text.dart';
 
 class HomeView extends StatefulWidget {
@@ -97,11 +98,23 @@ class _HomeViewState extends State<HomeView> {
                           mainAxisSpacing: 15,
                         ),
                     itemBuilder: (context, index) {
-                      return CardItem(
-                        image: itemsImage[index],
-                        name: 'Cheesburger',
-                        desc: 'Wendy"s Burger',
-                        rate: '⭐️ 4.9',
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (c) {
+                                return ProductDetailsView();
+                              },
+                            ),
+                          );
+                        },
+                        child: CardItem(
+                          image: itemsImage[index],
+                          name: 'Cheesburger',
+                          desc: 'Wendy"s Burger',
+                          rate: '⭐️ 4.9',
+                        ),
                       );
                     },
                   ),
