@@ -17,7 +17,7 @@ class SpicySlider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Image.asset('assets/details/burger1.png', height: 250),
+        Image.asset('assets/details/burger1.png', height: 200),
         Spacer(),
         Column(
           children: [
