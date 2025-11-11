@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:hungry_app/core/utils/pref_helpers.dart';
 
 class DioClient {
   final Dio _dio = Dio(
@@ -11,9 +12,9 @@ class DioClient {
   DioClient() {
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (option, handler) {
-          final token = 'Abdullah token';
-          if (token.isNotEmpty) {
+        onRequest: (option, handler) async {
+          final token = await PrefHelpers.getToken();
+          if (token != null && token.isNotEmpty) {
             option.headers['Authorization'] = 'Bearer $token';
           }
           return handler.next(option);
