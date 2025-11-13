@@ -1,26 +1,65 @@
 // ignore_for_file: avoid_print
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:hungry_app/core/constants/app_colors.dart';
+import 'package:hungry_app/core/network/api_error.dart';
+import 'package:hungry_app/features/auth/data/auth_repo.dart';
 import 'package:hungry_app/features/auth/view/signup_view.dart';
 import 'package:hungry_app/features/auth/widgets/custom_auth_btn.dart';
 import 'package:hungry_app/root.dart';
 import 'package:hungry_app/shared/custom_text.dart';
 import 'package:hungry_app/shared/custom_text_field.dart';
 
-class LoginView extends StatelessWidget {
+class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     TextEditingController emailController =
         TextEditingController();
     TextEditingController passWordController =
         TextEditingController();
-
     final GlobalKey<FormState> formkey = GlobalKey<FormState>();
+
+    bool isLoading = false;
+
+    AuthRepo authRepo = AuthRepo();
+
+    Future<void> login() async {
+      setState(() => isLoading = true);
+      if (formkey.currentState!.validate()) {
+        try {
+          final user = await authRepo.login(
+            emailController.text.trim(),
+            passWordController.text.trim(),
+          );
+          if (user != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (c) => Root()),
+            );
+          }
+          setState(() => isLoading = false);
+        } catch (e) {
+          setState(() => isLoading = false);
+          String errorMsg = 'Error In Login ';
+          if (e is ApiError) {
+            errorMsg = e.message;
+          }
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorMsg)));
+        }
+      }
+    }
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -57,14 +96,14 @@ class LoginView extends StatelessWidget {
                     isPassword: true,
                   ),
                   Gap(30),
-                  CustomAuthBtn(
-                    text: 'Login',
-                    onTap: () {
-                      if (formkey.currentState!.validate()) {
-                        print('Login Clicked');
-                      }
-                    },
-                  ),
+                  isLoading
+                      ? CupertinoActivityIndicator(
+                          color: Colors.white,
+                        )
+                      : CustomAuthBtn(
+                          text: 'Login',
+                          onTap: login,
+                        ),
                   Gap(30),
 
                   /// create Account Button

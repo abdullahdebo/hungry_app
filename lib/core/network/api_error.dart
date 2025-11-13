@@ -6,6 +6,6 @@ class ApiError {
 
   @override
   String toString() {
-    return 'error is : $message(StatusCode is $statusCode)';
+    return message;
   }
 }

@@ -1,0 +1,44 @@
+// ignore_for_file: body_might_complete_normally_nullable
+
+import 'package:dio/dio.dart';
+import 'package:hungry_app/core/network/api_error.dart';
+import 'package:hungry_app/core/network/api_exceptions.dart';
+import 'package:hungry_app/core/network/api_service.dart';
+import 'package:hungry_app/core/utils/pref_helpers.dart';
+import 'package:hungry_app/features/auth/data/user_model.dart';
+
+class AuthRepo {
+  ApiService apiService = ApiService();
+
+  /// login
+  Future<UserModel?> login(String email, String password) async {
+    try {
+      final response = await apiService.post('/login', {
+        'email': email,
+        'password': password,
+      });
+      if (response is ApiError) {
+        throw response;
+      }
+      if (response is Map<String, dynamic>) {
+        final msg = response['message'];
+        final code = response['code'];
+        final data = response['data'];
+        if (code != 200 || data == null) {
+          throw ApiError(message: msg);
+        }
+        final user = UserModel.fromJson(response['data']);
+        if (user.token != null) {
+          PrefHelpers.saveToken(user.token!);
+        }
+        return user;
+      } else {
+        throw ApiError(message: 'UnExpected Error From Server');
+      }
+    } on DioException catch (e) {
+      ApiExceptions.handleError(e);
+    } catch (e) {
+      throw ApiError(message: e.toString());
+    }
+  }
+}
