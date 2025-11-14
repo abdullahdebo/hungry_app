@@ -5,9 +5,14 @@ import 'package:hungry_app/core/constants/app_colors.dart';
 import 'package:hungry_app/features/auth/widgets/custom_auth_btn.dart';
 import 'package:hungry_app/shared/custom_text_field.dart';
 
-class SignupView extends StatelessWidget {
+class SignupView extends StatefulWidget {
   const SignupView({super.key});
 
+  @override
+  State<SignupView> createState() => _SignupViewState();
+}
+
+class _SignupViewState extends State<SignupView> {
   @override
   Widget build(BuildContext context) {
     TextEditingController emailController =
