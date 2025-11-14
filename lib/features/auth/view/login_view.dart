@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +10,7 @@ import 'package:hungry_app/features/auth/data/auth_repo.dart';
 import 'package:hungry_app/features/auth/view/signup_view.dart';
 import 'package:hungry_app/features/auth/widgets/custom_auth_btn.dart';
 import 'package:hungry_app/root.dart';
+import 'package:hungry_app/shared/custom_snack.dart';
 import 'package:hungry_app/shared/custom_text.dart';
 import 'package:hungry_app/shared/custom_text_field.dart';
 
@@ -54,39 +55,9 @@ class _LoginViewState extends State<LoginView> {
           if (e is ApiError) {
             errorMsg = e.message;
           }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.info,
-                    color: Colors.white,
-                    size: 14,
-                  ),
-                  Gap(10),
-                  CustomText(
-                    text: errorMsg,
-                    color: Colors.white,
-                    size: 12,
-                    weight: FontWeight.w500,
-                  ),
-                ],
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 10,
-              ),
-              margin: EdgeInsets.only(
-                bottom: 30,
-                right: 20,
-                left: 20,
-              ),
-              elevation: 10,
-              behavior: SnackBarBehavior.floating,
-              clipBehavior: Clip.none,
-              backgroundColor: Colors.red.shade900,
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(customSnack(errorMsg));
         }
       }
     }
