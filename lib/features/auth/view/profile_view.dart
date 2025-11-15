@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hungry_app/core/constants/app_colors.dart';
+import 'package:hungry_app/features/auth/view/login_view.dart';
 import 'package:hungry_app/features/auth/widgets/custom_user_text_field.dart';
 import 'package:hungry_app/root.dart';
 import 'package:hungry_app/shared/custom_text.dart';
@@ -181,9 +182,19 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 child: Row(
                   children: [
-                    CustomText(
-                      text: 'Log out',
-                      color: AppColors.primaryColor,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginView(),
+                          ),
+                        );
+                      },
+                      child: CustomText(
+                        text: 'Log out',
+                        color: AppColors.primaryColor,
+                      ),
                     ),
                     Gap(5),
                     Icon(
