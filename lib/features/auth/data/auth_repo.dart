@@ -61,8 +61,9 @@ class AuthRepo {
       if (response is Map<String, dynamic>) {
         final msg = response['message'];
         final code = response['code'];
+        final coder = int.tryParse(code);
         final data = response['data'];
-        if (code != 200 || data == null) {
+        if (coder != 200 && coder != 201) {
           throw ApiError(message: msg ?? 'Unknown error');
         }
         final user = UserModel.fromJson(response['data']);

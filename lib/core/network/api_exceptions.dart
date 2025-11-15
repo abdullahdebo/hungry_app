@@ -14,6 +14,10 @@ class ApiExceptions {
       );
     }
 
+    if (statusCode == 302) {
+      throw ApiError(message: 'This Email Already Taken');
+    }
+
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
         return ApiError(message: ' Connection Timed Out');
