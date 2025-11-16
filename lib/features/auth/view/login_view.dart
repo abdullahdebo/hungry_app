@@ -98,8 +98,9 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   Gap(30),
                   isLoading
-                      ? CupertinoActivityIndicator(
+                      ? CircularProgressIndicator(
                           color: Colors.white,
+                          strokeWidth: 1,
                         )
                       : CustomAuthBtn(
                           text: 'Login',

@@ -86,8 +86,9 @@ class _SignupViewState extends State<SignupView> {
                 ),
                 Gap(15),
                 isLoading
-                    ? CupertinoActivityIndicator(
+                    ? CircularProgressIndicator(
                         color: Colors.white,
+                        strokeWidth: 1,
                       )
                     : CustomTextField(
                         controller: passController,

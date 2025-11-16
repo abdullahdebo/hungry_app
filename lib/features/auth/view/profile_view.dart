@@ -2,9 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hungry_app/core/constants/app_colors.dart';
+import 'package:hungry_app/core/network/api_error.dart';
+import 'package:hungry_app/features/auth/data/auth_repo.dart';
+import 'package:hungry_app/features/auth/data/user_model.dart';
 import 'package:hungry_app/features/auth/view/login_view.dart';
 import 'package:hungry_app/features/auth/widgets/custom_user_text_field.dart';
 import 'package:hungry_app/root.dart';
+import 'package:hungry_app/shared/custom_snack.dart';
 import 'package:hungry_app/shared/custom_text.dart';
 
 class ProfileView extends StatefulWidget {
@@ -19,12 +23,36 @@ class _ProfileViewState extends State<ProfileView> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _adress = TextEditingController();
 
+  UserModel? userModel;
+
+  AuthRepo authRepo = AuthRepo();
+
+  Future<void> getProfileData() async {
+    try {
+      final user = await authRepo.getProfileData();
+      setState(() {
+        userModel = user;
+      });
+    } catch (e) {
+      String errorMsg = 'Error in profile ';
+      if (e is ApiError) {
+        errorMsg = e.message;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(customSnack(errorMsg));
+    }
+  }
+
   @override
   void initState() {
-    _name.text = 'Abdullah';
-    _email.text = 'abdo@gmail.com';
-    _adress.text = 'Dammam - Ksa';
-
+    getProfileData().then((v) {
+      _name.text = userModel?.name.toString() ?? 'Abdullah';
+      _email.text =
+          userModel?.email.toString() ?? 'abdo@gmail.com';
+      _adress.text =
+          userModel?.address.toString() ?? 'Dammam - Ksa';
+    });
     super.initState();
   }
 
@@ -62,26 +90,31 @@ class _ProfileViewState extends State<ProfileView> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Center(
-                child: Container(
-                  width: 150,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        'https://i.ibb.co/bR7wVVYS/sonic.png',
+              userModel == null
+                  ? CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 1,
+                    )
+                  : Center(
+                      child: Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: NetworkImage(
+                              userModel!.image!,
+                            ),
+                          ),
+                          border: Border.all(
+                            width: 2,
+                            color: Colors.white,
+                          ),
+
+                          color: Colors.grey.shade500,
+                        ),
                       ),
                     ),
-                    border: Border.all(
-                      width: 4,
-                      color: Colors.white,
-                    ),
-
-                    color: Colors.grey.shade500,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
               Gap(20),
               CustomUserTextField(
                 controller: _name,
