@@ -71,94 +71,97 @@ class _LoginViewState extends State<LoginView> {
             padding: EdgeInsets.symmetric(horizontal: 15.0),
             child: Form(
               key: formkey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Gap(160),
-                  SvgPicture.asset('assets/logo/logo.svg'),
-                  Gap(30),
-                  CustomText(
-                    text:
-                        'Welcome Back , Discover Our Fast Food App',
-                    color: Colors.white,
-                    size: 13,
-                    weight: FontWeight.w500,
-                  ),
-                  Gap(60),
-                  CustomTextField(
-                    controller: emailController,
-                    hint: 'Email Address',
-                    isPassword: false,
-                  ),
-                  Gap(20),
-                  CustomTextField(
-                    controller: passWordController,
-                    hint: 'Password',
-                    isPassword: true,
-                  ),
-                  Gap(30),
-                  isLoading
-                      ? CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 1,
-                        )
-                      : CustomAuthBtn(
-                          text: 'Login',
-                          onTap: login,
-                        ),
-                  Gap(30),
-
-                  /// create Account Button
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SignupView(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          width: 1,
-                          color: Colors.white,
-                        ),
-                      ),
-                      height: 55,
-                      width: double.infinity,
-                      child: Center(
-                        child: CustomText(
-                          text: 'Create Accont',
-                          weight: FontWeight.bold,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Gap(20),
-                  Divider(thickness: 1, color: Colors.white24),
-                  Gap(20),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Root(),
-                        ),
-                      );
-                    },
-                    child: CustomText(
-                      text: 'Continue as Guest ?',
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SvgPicture.asset('assets/logo/logo.svg'),
+                    Gap(30),
+                    CustomText(
+                      text:
+                          'Welcome Back , Discover Our Fast Food App',
                       color: Colors.white,
-                      size: 14,
-                      weight: FontWeight.w400,
+                      size: 13,
+                      weight: FontWeight.w500,
                     ),
-                  ),
-                ],
+                    Gap(60),
+                    CustomTextField(
+                      controller: emailController,
+                      hint: 'Email Address',
+                      isPassword: false,
+                    ),
+                    Gap(20),
+                    CustomTextField(
+                      controller: passWordController,
+                      hint: 'Password',
+                      isPassword: true,
+                    ),
+                    Gap(30),
+                    isLoading
+                        ? CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 1,
+                          )
+                        : CustomAuthBtn(
+                            text: 'Login',
+                            onTap: login,
+                          ),
+                    Gap(30),
+
+                    /// create Account Button
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SignupView(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(
+                            10,
+                          ),
+                          border: Border.all(
+                            width: 1,
+                            color: Colors.white,
+                          ),
+                        ),
+                        height: 55,
+                        width: double.infinity,
+                        child: Center(
+                          child: CustomText(
+                            text: 'Create Accont',
+                            weight: FontWeight.bold,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Gap(20),
+                    Divider(thickness: 1, color: Colors.white24),
+                    Gap(20),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Root(),
+                          ),
+                        );
+                      },
+                      child: CustomText(
+                        text: 'Continue as Guest ?',
+                        color: Colors.white,
+                        size: 14,
+                        weight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
