@@ -152,6 +152,7 @@ class _ProfileViewState extends State<ProfileView> {
                 enabled: userModel == null,
                 child: Column(
                   children: [
+                    Gap(12),
                     Center(
                       child: Container(
                         width: 150,
@@ -159,6 +160,16 @@ class _ProfileViewState extends State<ProfileView> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.grey.shade500,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(
+                                0.5,
+                              ),
+                              blurRadius: 3,
+                              spreadRadius: 1,
+                              offset: Offset(0, 0),
+                            ),
+                          ],
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: selectedImage != null
