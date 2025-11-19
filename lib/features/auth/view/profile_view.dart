@@ -1,3 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -10,6 +14,7 @@ import 'package:hungry_app/features/auth/widgets/custom_user_text_field.dart';
 import 'package:hungry_app/root.dart';
 import 'package:hungry_app/shared/custom_snack.dart';
 import 'package:hungry_app/shared/custom_text.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ProfileView extends StatefulWidget {
@@ -22,13 +27,15 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _email = TextEditingController();
-  final TextEditingController _adress = TextEditingController();
+  final TextEditingController _address = TextEditingController();
   final TextEditingController _visa = TextEditingController();
 
   UserModel? userModel;
-
+  String? selectedImage;
+  bool isLoading = false;
   AuthRepo authRepo = AuthRepo();
 
+  /// get profile function
   Future<void> getProfileData() async {
     try {
       final user = await authRepo.getProfileData();
@@ -46,13 +53,52 @@ class _ProfileViewState extends State<ProfileView> {
     }
   }
 
+  /// update profile
+  Future<void> updateProfileDate() async {
+    try {
+      setState(() => isLoading = true);
+      final user = await authRepo.updateProfileData(
+        name: _name.text.trim(),
+        email: _email.text.trim(),
+        address: _address.text.trim(),
+        imagePath: selectedImage,
+        visa: _visa.text.trim(),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        customSnack('Profile updated Successfully'),
+      );
+      setState(() => isLoading = false);
+      setState(() => userModel = user);
+      await getProfileData();
+    } catch (e) {
+      setState(() => isLoading = false);
+      String errorMsg = 'Failed to update profile ';
+      if (e is ApiError) errorMsg = e.message;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(customSnack(errorMsg));
+    }
+  }
+
+  /// pick image function
+  Future<void> pickImage() async {
+    final pickedImage = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedImage != null) {
+      setState(() {
+        selectedImage = pickedImage.path;
+      });
+    }
+  }
+
   @override
   void initState() {
     getProfileData().then((v) {
       _name.text = userModel?.name.toString() ?? 'ABDULLAH';
       _email.text =
           userModel?.email.toString() ?? 'abdo@gmail.com';
-      _adress.text = userModel?.address.toString() == ''
+      _address.text = userModel?.address.toString() == ''
           ? 'Dammam - Ksa'
           : userModel!.address!;
     });
@@ -112,22 +158,49 @@ class _ProfileViewState extends State<ProfileView> {
                         height: 150,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          image:
-                              userModel?.image != null &&
-                                  userModel!.image!.isNotEmpty
-                              ? DecorationImage(
-                                  image: NetworkImage(
-                                    userModel!.image!,
-                                  ),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
-                          border: Border.all(
-                            width: 2,
-                            color: Colors.white,
-                          ),
-
                           color: Colors.grey.shade500,
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: selectedImage != null
+                            ? Image.file(
+                                File(selectedImage!),
+                                fit: BoxFit.cover,
+                              )
+                            : (userModel?.image != null &&
+                                  userModel!.image!.isNotEmpty)
+                            ? Image.network(
+                                userModel!.image!,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (context, err, builder) =>
+                                        Icon(Icons.person),
+                              )
+                            : Icon(Icons.person),
+                      ),
+                    ),
+                    Gap(20),
+
+                    ///Upload Image Button
+                    GestureDetector(
+                      onTap: pickImage,
+                      child: Container(
+                        width: 140,
+                        height: 49,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 15,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(
+                            50,
+                          ),
+                        ),
+                        child: Center(
+                          child: CustomText(
+                            text: 'Upload Image',
+                            color: AppColors.primaryColor,
+                          ),
                         ),
                       ),
                     ),
@@ -143,7 +216,7 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     Gap(20),
                     CustomUserTextField(
-                      controller: _adress,
+                      controller: _address,
                       lable: 'Adress',
                     ),
                     Gap(20),
@@ -218,9 +291,17 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     child: Row(
                       children: [
-                        CustomText(
-                          text: 'Edit Profile',
-                          color: Colors.white,
+                        GestureDetector(
+                          onTap: updateProfileDate,
+                          child: isLoading
+                              ? CircularProgressIndicator(
+                                  strokeWidth: 1,
+                                  color: Colors.white,
+                                )
+                              : CustomText(
+                                  text: 'Edit Profile',
+                                  color: Colors.white,
+                                ),
                         ),
                         Gap(5),
                         Icon(
