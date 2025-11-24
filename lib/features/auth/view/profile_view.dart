@@ -80,6 +80,15 @@ class _ProfileViewState extends State<ProfileView> {
     }
   }
 
+  /// logout
+  Future<void> logout() async {
+    await authRepo.logout();
+    await Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginView()),
+    );
+  }
+
   /// pick image function
   Future<void> pickImage() async {
     final pickedImage = await ImagePicker().pickImage(
@@ -338,15 +347,7 @@ class _ProfileViewState extends State<ProfileView> {
                     child: Row(
                       children: [
                         GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    LoginView(),
-                              ),
-                            );
-                          },
+                          onTap: logout,
                           child: CustomText(
                             text: 'Log out',
                             color: AppColors.primaryColor,
