@@ -10,8 +10,10 @@ import 'package:hungry_app/core/network/api_error.dart';
 import 'package:hungry_app/features/auth/data/auth_repo.dart';
 import 'package:hungry_app/features/auth/data/user_model.dart';
 import 'package:hungry_app/features/auth/view/login_view.dart';
+import 'package:hungry_app/features/auth/view/signup_view.dart';
 import 'package:hungry_app/features/auth/widgets/custom_user_text_field.dart';
 import 'package:hungry_app/root.dart';
+import 'package:hungry_app/shared/custom_button.dart';
 import 'package:hungry_app/shared/custom_snack.dart';
 import 'package:hungry_app/shared/custom_text.dart';
 import 'package:image_picker/image_picker.dart';
@@ -30,10 +32,17 @@ class _ProfileViewState extends State<ProfileView> {
   final TextEditingController _address = TextEditingController();
   final TextEditingController _visa = TextEditingController();
 
+  bool isGuest = false;
   UserModel? userModel;
   String? selectedImage;
   bool isLoading = false;
   AuthRepo authRepo = AuthRepo();
+
+  Future<void> autoLogin() async {
+    final user = await authRepo.autoLogin();
+    setState(() => isGuest = authRepo.isGuest);
+    if (user != null) setState(() => userModel = user);
+  }
 
   /// get profile function
   Future<void> getProfileData() async {
@@ -103,6 +112,7 @@ class _ProfileViewState extends State<ProfileView> {
 
   @override
   void initState() {
+    autoLogin();
     getProfileData().then((v) {
       _name.text = userModel?.name.toString() ?? 'ABDULLAH';
       _email.text =
@@ -116,249 +126,341 @@ class _ProfileViewState extends State<ProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      displacement: 70,
-      color: AppColors.primaryColor,
-      backgroundColor: Colors.white,
-      onRefresh: () async {
-        await getProfileData();
-      },
-      child: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Scaffold(
-          backgroundColor: AppColors.primaryColor,
-          appBar: AppBar(
-            toolbarHeight: 30,
+    if (!isGuest) {
+      return RefreshIndicator(
+        displacement: 70,
+        color: AppColors.primaryColor,
+        backgroundColor: Colors.white,
+        onRefresh: () async {
+          await getProfileData();
+        },
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Scaffold(
             backgroundColor: AppColors.primaryColor,
-            scrolledUnderElevation: 0.0,
-            leading: GestureDetector(
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => Root()),
-                );
-              },
-              child: Icon(Icons.arrow_back, color: Colors.white),
-            ),
-            actions: [
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 0,
-                ),
+            appBar: AppBar(
+              toolbarHeight: 30,
+              backgroundColor: AppColors.primaryColor,
+              scrolledUnderElevation: 0.0,
+              leading: GestureDetector(
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => Root()),
+                  );
+                },
                 child: Icon(
-                  Icons.settings,
+                  Icons.arrow_back,
                   color: Colors.white,
-                  size: 30,
                 ),
               ),
-            ],
-          ),
-          body: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child: SingleChildScrollView(
-              child: Skeletonizer(
-                enabled: userModel == null,
-                child: Column(
-                  children: [
-                    Gap(12),
-                    Center(
-                      child: Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade500,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white.withOpacity(
-                                0.5,
+              actions: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 0,
+                  ),
+                  child: Icon(
+                    Icons.settings,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ],
+            ),
+            body: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: SingleChildScrollView(
+                child: Skeletonizer(
+                  enabled: userModel == null,
+                  child: Column(
+                    children: [
+                      Gap(12),
+                      Center(
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey.shade500,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withOpacity(
+                                  0.5,
+                                ),
+                                blurRadius: 3,
+                                spreadRadius: 1,
+                                offset: Offset(0, 0),
                               ),
-                              blurRadius: 3,
-                              spreadRadius: 1,
-                              offset: Offset(0, 0),
-                            ),
-                          ],
+                            ],
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: selectedImage != null
+                              ? Image.file(
+                                  File(selectedImage!),
+                                  fit: BoxFit.cover,
+                                )
+                              : (userModel?.image != null &&
+                                    userModel!.image!.isNotEmpty)
+                              ? Image.network(
+                                  userModel!.image!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder:
+                                      (context, err, builder) =>
+                                          Icon(Icons.person),
+                                )
+                              : Icon(Icons.person),
                         ),
-                        clipBehavior: Clip.antiAlias,
-                        child: selectedImage != null
-                            ? Image.file(
-                                File(selectedImage!),
-                                fit: BoxFit.cover,
-                              )
-                            : (userModel?.image != null &&
-                                  userModel!.image!.isNotEmpty)
-                            ? Image.network(
-                                userModel!.image!,
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (context, err, builder) =>
-                                        Icon(Icons.person),
-                              )
-                            : Icon(Icons.person),
                       ),
-                    ),
-                    Gap(20),
+                      Gap(20),
 
-                    ///Upload Image Button
-                    GestureDetector(
-                      onTap: pickImage,
-                      child: Container(
-                        width: 140,
-                        height: 49,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 15,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(
-                            50,
+                      ///Upload Image Button
+                      GestureDetector(
+                        onTap: pickImage,
+                        child: Container(
+                          width: 140,
+                          height: 49,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 15,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(
+                              50,
+                            ),
+                          ),
+                          child: Center(
+                            child: CustomText(
+                              text: 'Upload Image',
+                              color: AppColors.primaryColor,
+                            ),
                           ),
                         ),
-                        child: Center(
-                          child: CustomText(
-                            text: 'Upload Image',
+                      ),
+                      Gap(20),
+                      CustomUserTextField(
+                        controller: _name,
+                        lable: 'Name',
+                      ),
+                      Gap(20),
+                      CustomUserTextField(
+                        controller: _email,
+                        lable: 'Email',
+                      ),
+                      Gap(20),
+                      CustomUserTextField(
+                        controller: _address,
+                        lable: 'Adress',
+                      ),
+                      Gap(20),
+                      Divider(),
+                      Gap(20),
+                      userModel?.visa == ''
+                          ? CustomUserTextField(
+                              textInputType:
+                                  TextInputType.number,
+                              controller: _visa,
+                              lable: 'ADD VISA CARD ',
+                            )
+                          : ListTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadiusGeometry.circular(
+                                      8,
+                                    ),
+                              ),
+                              tileColor: Color(0xffF3F4F6),
+                              contentPadding:
+                                  EdgeInsets.symmetric(
+                                    vertical: 2,
+                                    horizontal: 16,
+                                  ),
+                              leading: Image.asset(
+                                'assets/icon/visa.png',
+                                width: 50,
+                                color: Colors.blue.shade900,
+                              ),
+                              title: CustomText(
+                                text: 'Debit card',
+                                color: Colors.black,
+                              ),
+                              subtitle: CustomText(
+                                text:
+                                    userModel?.visa ??
+                                    '**** **** **** 8926',
+                                color: Colors.black,
+                              ),
+                              trailing: CustomText(
+                                text: 'Default',
+                                color: Colors.black,
+                                size: 14,
+                              ),
+                            ),
+                      Gap(20),
+
+                      Gap(275),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            bottomSheet: Container(
+              height: 85,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.spaceAround,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 15,
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: updateProfileDate,
+                            child: isLoading
+                                ? CircularProgressIndicator(
+                                    strokeWidth: 1,
+                                    color: Colors.white,
+                                  )
+                                : CustomText(
+                                    text: 'Edit Profile',
+                                    color: Colors.white,
+                                  ),
+                          ),
+                          Gap(5),
+                          Icon(
+                            CupertinoIcons.pencil,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          width: 2,
+                          color: AppColors.primaryColor,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 15,
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: logout,
+                            child: CustomText(
+                              text: 'Log out',
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          Gap(5),
+                          Icon(
+                            Icons.logout,
                             color: AppColors.primaryColor,
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                    Gap(20),
-                    CustomUserTextField(
-                      controller: _name,
-                      lable: 'Name',
-                    ),
-                    Gap(20),
-                    CustomUserTextField(
-                      controller: _email,
-                      lable: 'Email',
-                    ),
-                    Gap(20),
-                    CustomUserTextField(
-                      controller: _address,
-                      lable: 'Adress',
-                    ),
-                    Gap(20),
-                    Divider(),
-                    Gap(20),
-                    userModel?.visa == ''
-                        ? CustomUserTextField(
-                            textInputType: TextInputType.number,
-                            controller: _visa,
-                            lable: 'ADD VISA CARD ',
-                          )
-                        : ListTile(
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadiusGeometry.circular(
-                                    8,
-                                  ),
-                            ),
-                            tileColor: Color(0xffF3F4F6),
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 2,
-                              horizontal: 16,
-                            ),
-                            leading: Image.asset(
-                              'assets/icon/visa.png',
-                              width: 50,
-                              color: Colors.blue.shade900,
-                            ),
-                            title: CustomText(
-                              text: 'Debit card',
-                              color: Colors.black,
-                            ),
-                            subtitle: CustomText(
-                              text:
-                                  userModel?.visa ??
-                                  '**** **** **** 8926',
-                              color: Colors.black,
-                            ),
-                            trailing: CustomText(
-                              text: 'Default',
-                              color: Colors.black,
-                              size: 14,
-                            ),
-                          ),
-                    Gap(20),
-
-                    Gap(275),
                   ],
                 ),
               ),
             ),
           ),
-          bottomSheet: Container(
-            height: 85,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
+        ),
+      );
+    } else if (isGuest) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              padding: EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
+                    width: 120,
+                    height: 120,
                     decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withOpacity(
+                        0.1,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      CupertinoIcons
+                          .person_crop_circle_badge_exclam,
+                      size: 60,
                       color: AppColors.primaryColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 15,
-                    ),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: updateProfileDate,
-                          child: isLoading
-                              ? CircularProgressIndicator(
-                                  strokeWidth: 1,
-                                  color: Colors.white,
-                                )
-                              : CustomText(
-                                  text: 'Edit Profile',
-                                  color: Colors.white,
-                                ),
-                        ),
-                        Gap(5),
-                        Icon(
-                          CupertinoIcons.pencil,
-                          color: Colors.white,
-                        ),
-                      ],
                     ),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        width: 2,
-                        color: AppColors.primaryColor,
+                  Gap(30),
+
+                  CustomText(
+                    text: 'Guest Mode',
+                    size: 24,
+                    weight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  Gap(12),
+                  Text(
+                    'You are currently browsing as a guest.\nPlease log in to manage your profile and access all features.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.grey.shade600,
+                      height: 1.5,
+                    ),
+                  ),
+                  Gap(40),
+
+                  // زر تسجيل الدخول
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomButton(
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (c) => LoginView(),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(8),
+                      text: 'Login Now',
                     ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 15,
-                    ),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: logout,
-                          child: CustomText(
-                            text: 'Log out',
-                            color: AppColors.primaryColor,
-                          ),
+                  ),
+
+                  Gap(16),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (c) => SignupView(),
                         ),
-                        Gap(5),
-                        Icon(
-                          Icons.logout,
-                          color: AppColors.primaryColor,
-                        ),
-                      ],
+                      );
+                    },
+                    child: CustomText(
+                      text: 'Don\'t have an account? Sign Up',
+                      color: AppColors.primaryColor,
+                      size: 14,
+                      weight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -366,7 +468,8 @@ class _ProfileViewState extends State<ProfileView> {
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+    return SizedBox();
   }
 }
