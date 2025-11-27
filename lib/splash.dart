@@ -1,10 +1,10 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:hungry_app/core/constants/app_colors.dart';
+import 'package:hungry_app/features/auth/data/auth_repo.dart';
 import 'package:hungry_app/features/auth/view/login_view.dart';
+import 'package:hungry_app/root.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -15,102 +15,135 @@ class SplashView extends StatefulWidget {
 
 class _SplashViewState extends State<SplashView>
     with SingleTickerProviderStateMixin {
-  late AnimationController controller;
+  double _opacity = 0.0;
 
-  late Animation<double> fadeLogo;
-  late Animation<Offset> slideLogo;
+  // AuthRepo authRepo = AuthRepo();
+  // Future <void> _checkLogin () async {
+  //   try {
+  //     final user = await authRepo.autoLogin();
+  //     if (!mounted) return;
+  //
+  //     if(authRepo.isGuest) {
+  //       Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => Root()));
+  //     } else if (authRepo.isLoggedIn) {
+  //       Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => Root()));
+  //     } else {
+  //       Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => LoginView()));
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Auto login failed: $e');
+  //     if (mounted) {
+  //       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginView()));
+  //     }
+  //   }
+  // }
 
-  late Animation<double> fadeImage;
-  late Animation<Offset> slideImage;
+  AuthRepo authRepo = AuthRepo();
+
+  Future<void> _checkLogin() async {
+    try {
+      final user = await authRepo.autoLogin();
+      if (!mounted) return;
+      if (authRepo.isGuest) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (c) => Root()),
+        );
+      } else if (user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (c) => Root()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (c) => LoginView()),
+        );
+      }
+    } catch (e) {
+      debugPrint('Auto login failed: $e');
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginView()),
+        );
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-
-    controller = AnimationController(
-      duration: Duration(milliseconds: 900),
-      vsync: this,
+    Future.delayed(
+      const Duration(milliseconds: 200),
+      () => setState(() => _opacity = 1.0),
     );
-
-    // Logo enters from the LEFT + fade
-    fadeLogo = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: Interval(0.0, 0.6, curve: Curves.easeOut),
-      ),
-    );
-
-    slideLogo =
-        Tween<Offset>(
-          begin: Offset(-0.3, 0), // from left
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(0.0, 0.6, curve: Curves.easeOut),
-          ),
-        );
-
-    // SPASH IMAGE enters from the BOTTOM with a delay (staggered)
-    fadeImage = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: Interval(0.4, 1.0, curve: Curves.easeOut),
-      ),
-    );
-
-    slideImage =
-        Tween<Offset>(
-          begin: Offset(0, 0.35), // from bottom
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(0.4, 1.0, curve: Curves.easeOut),
-          ),
-        );
-
-    controller.forward();
-
-    Future.delayed(Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (c) => LoginView()),
-      );
-    });
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
+    Future.delayed(const Duration(seconds: 1), _checkLogin);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryColor,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Gap(300),
-            FadeTransition(
-              opacity: fadeLogo,
-              child: SlideTransition(
-                position: slideLogo,
-                child: SvgPicture.asset('assets/logo/logo.svg'),
-              ),
-            ),
-            Spacer(),
-            FadeTransition(
-              opacity: fadeImage,
-              child: SlideTransition(
-                position: slideImage,
-                child: Image.asset('assets/splash/splash.png'),
-              ),
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryColor.withOpacity(0.9),
+            AppColors.primaryColor.withOpacity(0.8),
+            AppColors.primaryColor.withOpacity(0.7),
+            AppColors.primaryColor.withOpacity(0.6),
+            AppColors.primaryColor.withOpacity(0.5),
+            AppColors.primaryColor.withOpacity(0.4),
+            AppColors.primaryColor.withOpacity(0.3),
+            AppColors.primaryColor.withOpacity(0.2),
+            AppColors.primaryColor.withOpacity(0.1),
           ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.green
+            .withOpacity(0.1)
+            .withAlpha(1),
+        body: Center(
+          child: AnimatedOpacity(
+            duration: const Duration(seconds: 1),
+            opacity: _opacity,
+            curve: Curves.easeInOut,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Gap(280),
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.8, end: 1.0),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.easeOutBack,
+                  builder: (context, scale, child) =>
+                      Transform.scale(
+                        scale: scale,
+                        child: child,
+                      ),
+                  child: SvgPicture.asset(
+                    'assets/logo/logo.svg',
+                  ),
+                ),
+
+                const Spacer(),
+
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 40, end: 0),
+                  duration: const Duration(milliseconds: 900),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) =>
+                      Transform.translate(
+                        offset: Offset(0, value),
+                        child: child,
+                      ),
+                  child: Image.asset('assets/splash/splash.png'),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
